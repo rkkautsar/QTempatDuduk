@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/database">
+        <file>female.txt</file>
+        <file>male.txt</file>
+    </qresource>
+</RCC>
