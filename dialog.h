@@ -15,6 +15,8 @@ public:
 protected slots:
     void acakv2();
     void acak();
+    void acak_campur();
+    void acak_campur_animated();
 };
 
 #endif // DIALOG_H

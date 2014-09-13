@@ -13,7 +13,7 @@ QList<QString> gents,lads;
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent)
 {
-    this->setWindowTitle("Tempat Duduk v1.0");
+    this->setWindowTitle("Tempat Duduk v1.1");
     this->resize(1130,500);
 
     mainLayout=new QVBoxLayout(this);
@@ -39,6 +39,7 @@ Dialog::Dialog(QWidget *parent) :
     QFont font;
     font.setPointSize(16);
     font.setBold(true);
+    font.setFamily("Open Sans");
 
     for(int i=0;i<2*4;i+=2)
         for(int j=0;j<3*4;j+=3){
@@ -48,7 +49,7 @@ Dialog::Dialog(QWidget *parent) :
                 meja->setMinimumSize(18,90);
                 meja->setFont(font);
                 meja->setAutoFillBackground(true);
-                meja->setText("dummy");
+                meja->setText("-");
                 meja->setAlignment(Qt::AlignCenter);
                 mejaLayout->addWidget(meja,i,j+k);
                 tempat_duduk.push_back(meja);
@@ -61,7 +62,7 @@ Dialog::Dialog(QWidget *parent) :
 
     for(int i=0;i<3;++i){
         meja=new QLabel(this);
-        meja->setText("dummy");
+        meja->setText("-");
         meja->setPalette(palette);
         meja->setMinimumSize(18,90);
         meja->setFont(font);
@@ -72,13 +73,16 @@ Dialog::Dialog(QWidget *parent) :
     }
 
     QPushButton* btnRandomize=new QPushButton("Acak!",this);
+    QPushButton* btnRandomizeCombine=new QPushButton("Acak! (campur)",this);
     QPushButton* btnExit=new QPushButton("Exit",this);
     buttonLayout->addStretch();
     buttonLayout->addWidget(btnRandomize);
+    buttonLayout->addWidget(btnRandomizeCombine);
     buttonLayout->addWidget(btnExit);
 
     connect(btnExit,SIGNAL(clicked()),this,SLOT(accept()));
     connect(btnRandomize,SIGNAL(clicked()),this,SLOT(acakv2()));
+    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(acak_campur_animated()));
 
 
     mainLayout->addLayout(mejaLayout);
@@ -121,10 +125,10 @@ Dialog::~Dialog()
 
 void Dialog::acakv2(){
     QTime dieTime;
-    for(int i=0;i<30;++i){
+    for(int i=0;i<10;++i){
         acak();
-        //delay 100 ms
-        dieTime=QTime::currentTime().addMSecs(100);
+        //delay 50 ms
+        dieTime=QTime::currentTime().addMSecs(50);
         while( QTime::currentTime() < dieTime )
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     }
@@ -154,4 +158,30 @@ void Dialog::acak(){
     }
     for(int i=lads.size()-3;i<lads.size();++i)
         tempat_duduk[mcount++]->setText(lads[i]);
+}
+
+void Dialog::acak_campur_animated(){
+    QTime dieTime;
+    for(int i=0;i<10;++i){
+        acak_campur();
+        //delay 50 ms
+        dieTime=QTime::currentTime().addMSecs(50);
+        while( QTime::currentTime() < dieTime )
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+}
+
+void Dialog::acak_campur(){
+    //shuffle
+    std::random_shuffle(gents.begin(),gents.end());
+    std::random_shuffle(lads.begin(),lads.end());
+
+    //set text
+    int gcount=0,lcount=0,mcount=0;
+    for(int i=0;i<tempat_duduk.size();++i){
+        if((i&1)==0 && gcount<gents.size())
+            tempat_duduk[mcount++]->setText(gents[gcount++]);
+        else
+            tempat_duduk[mcount++]->setText(lads[lcount++]);
+    }
 }
