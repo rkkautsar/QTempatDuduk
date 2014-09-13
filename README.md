@@ -5,7 +5,7 @@ A QT4 app to randomize seating. Created for learning purposes.
 
 ## Features
 - Randomize seating (with regards to gender)
-- Randomize seating (with no regards of gender) (NEW)
+- Randomize seating (with no regards to gender) (NEW)
 - Hard-coded seating layout
 
 ## Configuration
