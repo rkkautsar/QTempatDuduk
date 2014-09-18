@@ -1,7 +1,6 @@
 #include "dialog.h"
 #include <QApplication>
 #include <QtGui>
-#include <bits/stdc++.h>
 #include <QList>
 
 int main(int argc, char *argv[])

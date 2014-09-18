@@ -1,120 +1,9 @@
 #include "dialog.h"
-#include <QApplication>
-#include <QtGui>
-#include <bits/stdc++.h>
-#include <QList>
-
-QVBoxLayout* mainLayout;
-QHBoxLayout* buttonLayout;
-QGridLayout* mejaLayout;
-QList<QLabel*> tempat_duduk;
-QList<QString> gents,lads;
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent)
 {
-    this->setWindowTitle("Tempat Duduk v1.1");
-    this->resize(1130,500);
-
-    mainLayout=new QVBoxLayout(this);
-    buttonLayout=new QHBoxLayout(this);
-    mejaLayout=new QGridLayout(this);
-    QLabel* meja;
-    QSpacerItem* space;
-
-    QPalette palette;
-
-    QBrush brush(QColor(255, 255, 255, 255));
-    brush.setStyle(Qt::SolidPattern);
-
-    QBrush brush1(QColor(220, 160, 100, 255));
-    brush1.setStyle(Qt::SolidPattern);
-
-    palette.setBrush(QPalette::Active, QPalette::WindowText, brush);
-    palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-
-    palette.setBrush(QPalette::Active, QPalette::Window, brush1);
-    palette.setBrush(QPalette::Inactive, QPalette::Window, brush1);
-
-    QFont font;
-    font.setPointSize(16);
-    font.setBold(true);
-    font.setFamily("Open Sans");
-
-    for(int i=0;i<2*4;i+=2)
-        for(int j=0;j<3*4;j+=3){
-            for(int k=0;k<2;++k){
-                meja=new QLabel(this);
-                meja->setPalette(palette);
-                meja->setMinimumSize(18,90);
-                meja->setFont(font);
-                meja->setAutoFillBackground(true);
-                meja->setText("-");
-                meja->setAlignment(Qt::AlignCenter);
-                mejaLayout->addWidget(meja,i,j+k);
-                tempat_duduk.push_back(meja);
-            }
-            space=new QSpacerItem(10,0);
-            if(j<(3*4-1))mejaLayout->addItem(space,i,j+1);
-            space=new QSpacerItem(0,10);
-            if(i<(2*4-1))mejaLayout->addItem(space,i+1,j,1,3);
-        }
-
-    for(int i=0;i<3;++i){
-        meja=new QLabel(this);
-        meja->setText("-");
-        meja->setPalette(palette);
-        meja->setMinimumSize(18,90);
-        meja->setFont(font);
-        meja->setAutoFillBackground(true);
-        meja->setAlignment(Qt::AlignCenter);
-        tempat_duduk.push_back(meja);
-        mejaLayout->addWidget(meja,2*4,4+i);
-    }
-
-    QPushButton* btnRandomize=new QPushButton("Acak!",this);
-    QPushButton* btnRandomizeCombine=new QPushButton("Acak! (campur)",this);
-    QPushButton* btnExit=new QPushButton("Exit",this);
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(btnRandomize);
-    buttonLayout->addWidget(btnRandomizeCombine);
-    buttonLayout->addWidget(btnExit);
-
-    connect(btnExit,SIGNAL(clicked()),this,SLOT(accept()));
-    connect(btnRandomize,SIGNAL(clicked()),this,SLOT(acakv2()));
-    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(acak_campur_animated()));
-
-
-    mainLayout->addLayout(mejaLayout);
-    mainLayout->addLayout(buttonLayout);
-    this->setLayout(mainLayout);
-
-    //get data
-    QString s;
-    QFile db1(":/database/male.txt"),db2(":/database/female.txt");
-    if(!db1.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", db1.errorString());
-    }
-    if(!db2.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", db2.errorString());
-    }
-
-    QTextStream in1(&db1);
-    while(!in1.atEnd()) {
-        s = in1.readLine();
-        if(s.size()>1)gents.push_back(s);
-    }
-    db1.close();
-
-    QTextStream in2(&db2);
-    while(!in2.atEnd()) {
-        s = in2.readLine();
-        if(s.size()>1)lads.push_back(s);
-    }
-    db2.close();
-
-    srand(time(NULL));
-
+    init();
 }
 
 Dialog::~Dialog()
@@ -122,19 +11,43 @@ Dialog::~Dialog()
 
 }
 
+//TODO: add custom shuffle, possibly using textfile
 
-void Dialog::acakv2(){
-    QTime dieTime;
-    for(int i=0;i<10;++i){
-        acak();
-        //delay 50 ms
-        dieTime=QTime::currentTime().addMSecs(50);
+void Dialog::shuffle_animated(){
+    //lock button
+    btnRandomize->setDown(true);
+    disconnect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
+
+    for(int i=0;i<animation_time;++i){
+        shuffle();
+        dieTime=QTime::currentTime().addMSecs(per_frame_ms);
         while( QTime::currentTime() < dieTime )
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+            QCoreApplication::processEvents(QEventLoop::ExcludeSocketNotifiers, per_frame_ms);
     }
+
+    //enable button
+    btnRandomize->setDown(false);
+    connect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
 }
 
-void Dialog::acak(){
+void Dialog::shuffle_no_gender_animated(){
+    //lock button
+    btnRandomizeCombine->setDown(true);
+    disconnect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
+
+    for(int i=0;i<animation_time;++i){
+        shuffle_no_gender();
+        dieTime=QTime::currentTime().addMSecs(per_frame_ms);
+        while( QTime::currentTime() < dieTime )
+            QCoreApplication::processEvents(QEventLoop::ExcludeSocketNotifiers, per_frame_ms);
+    }
+
+    //enable button
+    btnRandomizeCombine->setDown(false);
+    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
+}
+
+void Dialog::shuffle(){
     //shuffle
     std::random_shuffle(gents.begin(),gents.end());
     std::random_shuffle(lads.begin(),lads.end());
@@ -144,44 +57,149 @@ void Dialog::acak(){
     for(int i=0;i<4;++i){
         for(int j=0;j<4;++j){
             if(i==3 && j==2){
-                tempat_duduk[mcount++]->setText(gents[gcount++]);
-                tempat_duduk[mcount++]->setText(gents[gcount++]);
+                seating[mcount++]->setText(gents[gcount++]);
+                seating[mcount++]->setText(gents[gcount++]);
                 continue;
             } else if((i+j)&1){
-                tempat_duduk[mcount++]->setText(lads[lcount++]);
-                tempat_duduk[mcount++]->setText(lads[lcount++]);
+                seating[mcount++]->setText(lads[lcount++]);
+                seating[mcount++]->setText(lads[lcount++]);
             } else {
-                tempat_duduk[mcount++]->setText(gents[gcount++]);
-                tempat_duduk[mcount++]->setText(gents[gcount++]);
+                seating[mcount++]->setText(gents[gcount++]);
+                seating[mcount++]->setText(gents[gcount++]);
             }
         }
     }
     for(int i=lads.size()-3;i<lads.size();++i)
-        tempat_duduk[mcount++]->setText(lads[i]);
+        seating[mcount++]->setText(lads[i]);
 }
 
-void Dialog::acak_campur_animated(){
-    QTime dieTime;
-    for(int i=0;i<10;++i){
-        acak_campur();
-        //delay 50 ms
-        dieTime=QTime::currentTime().addMSecs(50);
-        while( QTime::currentTime() < dieTime )
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    }
-}
-
-void Dialog::acak_campur(){
+void Dialog::shuffle_no_gender(){
     //shuffle
     std::random_shuffle(gents.begin(),gents.end());
     std::random_shuffle(lads.begin(),lads.end());
 
     //set text
     int gcount=0,lcount=0,mcount=0;
-    for(int i=0;i<tempat_duduk.size();++i){
+    for(int i=0;i<seating.size();++i){
         if((i&1)==0 && gcount<gents.size())
-            tempat_duduk[mcount++]->setText(gents[gcount++]);
+            seating[mcount++]->setText(gents[gcount++]);
         else
-            tempat_duduk[mcount++]->setText(lads[lcount++]);
+            seating[mcount++]->setText(lads[lcount++]);
     }
+}
+
+void Dialog::init(){
+    this->setWindowTitle("QTempatDuduk v1.2");
+    this->resize(1130,500);
+
+    btnRandomize=new QPushButton(tr("Shuffle! (&gender)"),this);
+    btnRandomizeCombine=new QPushButton(tr("Shuffle! (&normal)"),this);
+    btnExit=new QPushButton(tr("E&xit"),this);
+
+    mainLayout=new QVBoxLayout(this);
+    buttonLayout=new QHBoxLayout(this);
+    seatLayout=new QGridLayout(this);
+
+    init_seat();
+
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(btnRandomize);
+    buttonLayout->addWidget(btnRandomizeCombine);
+    buttonLayout->addWidget(btnExit);
+
+    connect(btnExit,SIGNAL(clicked()),this,SLOT(accept()));
+    connect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
+    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
+
+
+    mainLayout->addLayout(seatLayout);
+    mainLayout->addLayout(buttonLayout);
+    this->setLayout(mainLayout);
+
+    init_data();
+
+    srand(QTime::currentTime().msec());
+}
+
+void Dialog::init_seat(){
+    QBrush fontBrush(QColor(255, 255, 255, 255));
+    fontBrush.setStyle(Qt::SolidPattern);
+
+    QBrush seatBrush(QColor(200, 100, 40, 255));
+    seatBrush.setStyle(Qt::SolidPattern);
+
+    palette.setBrush(QPalette::Active, QPalette::WindowText, fontBrush);
+    palette.setBrush(QPalette::Inactive, QPalette::WindowText, fontBrush);
+
+    palette.setBrush(QPalette::Active, QPalette::Window, seatBrush);
+    palette.setBrush(QPalette::Inactive, QPalette::Window, seatBrush);
+
+    font.setPointSize(16);
+    font.setBold(true);
+    font.setFamily("Open Sans"); //change this if you don't have Open Sans
+
+    //TODO: add dynamic seating layout, possibly using textfile
+
+    for(int i=0;i<2*4;i+=2)
+        for(int j=0;j<3*4;j+=3){
+            for(int k=0;k<2;++k){
+                seat=new QLabel(this);
+                seat->setPalette(palette);
+                seat->setMinimumSize(18,90);
+                seat->setFont(font);
+                seat->setAutoFillBackground(true);
+                seat->setText("-");
+                seat->setAlignment(Qt::AlignCenter);
+                seatLayout->addWidget(seat,i,j+k);
+                seating.push_back(seat);
+            }
+            space=new QSpacerItem(10,0);
+            if(j<(3*4-1))seatLayout->addItem(space,i,j+1);
+            space=new QSpacerItem(0,10);
+            if(i<(2*4-1))seatLayout->addItem(space,i+1,j,1,3);
+        }
+
+    for(int i=0;i<3;++i){
+        seat=new QLabel(this);
+        seat->setText("-");
+        seat->setPalette(palette);
+        seat->setMinimumSize(18,90);
+        seat->setFont(font);
+        seat->setAutoFillBackground(true);
+        seat->setAlignment(Qt::AlignCenter);
+        seating.push_back(seat);
+        seatLayout->addWidget(seat,2*4,4+i);
+    }
+
+}
+
+void Dialog::init_data(){
+    //get data
+    QString s;
+    QFile db_male(":/database/male.txt"),db_female(":/database/female.txt");
+    if(!db_male.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", db_male.errorString());
+    }
+    if(!db_female.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", db_female.errorString());
+    }
+
+    QTextStream in_male(&db_male),in_female(&db_female);
+    int male_count, female_count;
+
+    in_male>>male_count;
+    in_male.readLine();
+    for(int i=0;i<male_count;++i){
+        s = in_male.readLine();
+        if(s.size()>1)gents.push_back(s);
+    }
+    db_male.close();
+
+    in_female>>female_count;
+    in_female.readLine();
+    for(int i=0;i<female_count;++i) {
+        s = in_female.readLine();
+        if(s.size()>1)lads.push_back(s);
+    }
+    db_female.close();
 }
