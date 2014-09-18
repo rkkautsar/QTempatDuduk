@@ -64,5 +64,5 @@ ff.mm.ff.mm
 ...........
 ....fff....
 ```
-The layout and rule section is a mapping or matrix `[number of row] x [number of column]` of characters. The accepted characters are `{'.','m','f'}`. `'.'` represents a space, `'m'` represents a seat that should be seated by a male, and `'m'` represents a seat that should be seated by a female. You should at dots between rows too so there is a space between seating rows.
+The layout and rule section is a mapping or matrix `[number of row] x [number of column]` of characters. The accepted characters are `{'.','m','f'}`. `'.'` represents a space, `'m'` represents a seat that should be seated by a male, and `'f'` represents a seat that should be seated by a female. You should at dots between rows too so there is a space between seating rows.
 
