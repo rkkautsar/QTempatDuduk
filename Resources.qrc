@@ -2,5 +2,6 @@
     <qresource prefix="/database">
         <file>female.txt</file>
         <file>male.txt</file>
+        <file>custom.seating.txt</file>
     </qresource>
 </RCC>
