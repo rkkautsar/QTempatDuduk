@@ -13,7 +13,7 @@
 #define FONTSIZE 16
 #define FONTFAMILY "Open Sans"
 //Sizes in format width,height
-#define SEATMINIMUMSIZE 15,80
+#define SEATMINIMUMSIZE 90,60
 #define SPACERSIZE 15,10
 
 #endif // CONFIG_H
