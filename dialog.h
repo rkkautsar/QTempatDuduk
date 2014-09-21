@@ -11,6 +11,8 @@
 
 #define animation_time_ms 500 //500 ms
 #define per_frame_ms 50 //1 frame per 50 ms
+#define MALE true
+#define FEMALE false
 
 const int animation_time=animation_time_ms/per_frame_ms;
 
@@ -25,24 +27,24 @@ public:
 protected slots:
     void shuffle();
     void shuffle_animated();
-    void shuffle_no_gender();
-    void shuffle_no_gender_animated();
 
 private:
     QVBoxLayout* mainLayout;
     QHBoxLayout* buttonLayout;
     QGridLayout* seatLayout;
+    QList<bool> seating_rule; //true for male, false for female
     QList<QLabel*> seating;
-    QList<QString> gents,lads;
-    QPushButton *btnRandomize, *btnRandomizeCombine, *btnExit;
+    QList<QString> male,female,rule;
+    QPushButton *btnRandomize, *btnExit;
     QLabel* seat;
-    QSpacerItem* space;
     QPalette palette;
     QFont font;
     QTime dieTime;
+    int male_count,female_count,rule_male,rule_female,rule_row,rule_column;
 
     void init();
     void init_seat();
+    void init_seat_aux();
     void init_data();
 
 };

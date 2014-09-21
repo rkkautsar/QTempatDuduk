@@ -22,7 +22,7 @@ void Dialog::shuffle_animated(){
         shuffle();
         dieTime=QTime::currentTime().addMSecs(per_frame_ms);
         while( QTime::currentTime() < dieTime )
-            QCoreApplication::processEvents(QEventLoop::ExcludeSocketNotifiers, per_frame_ms);
+            QCoreApplication::processEvents(QEventLoop::AllEvents, per_frame_ms);
     }
 
     //enable button
@@ -30,95 +30,44 @@ void Dialog::shuffle_animated(){
     connect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
 }
 
-void Dialog::shuffle_no_gender_animated(){
-    //lock button
-    btnRandomizeCombine->setDown(true);
-    disconnect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
-
-    for(int i=0;i<animation_time;++i){
-        shuffle_no_gender();
-        dieTime=QTime::currentTime().addMSecs(per_frame_ms);
-        while( QTime::currentTime() < dieTime )
-            QCoreApplication::processEvents(QEventLoop::ExcludeSocketNotifiers, per_frame_ms);
-    }
-
-    //enable button
-    btnRandomizeCombine->setDown(false);
-    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
-}
-
 void Dialog::shuffle(){
     //shuffle
-    std::random_shuffle(gents.begin(),gents.end());
-    std::random_shuffle(lads.begin(),lads.end());
+    srand(QTime::currentTime().msec());
+    std::random_shuffle(male.begin(),male.end());
+    std::random_shuffle(female.begin(),female.end());
 
-    //set text
-    int gcount=0,lcount=0,mcount=0;
-    for(int i=0;i<4;++i){
-        for(int j=0;j<4;++j){
-            if(i==3 && j==2){
-                seating[mcount++]->setText(gents[gcount++]);
-                seating[mcount++]->setText(gents[gcount++]);
-                continue;
-            } else if((i+j)&1){
-                seating[mcount++]->setText(lads[lcount++]);
-                seating[mcount++]->setText(lads[lcount++]);
-            } else {
-                seating[mcount++]->setText(gents[gcount++]);
-                seating[mcount++]->setText(gents[gcount++]);
-            }
-        }
-    }
-    for(int i=lads.size()-3;i<lads.size();++i)
-        seating[mcount++]->setText(lads[i]);
-}
-
-void Dialog::shuffle_no_gender(){
-    //shuffle
-    std::random_shuffle(gents.begin(),gents.end());
-    std::random_shuffle(lads.begin(),lads.end());
-
-    //set text
-    int gcount=0,lcount=0,mcount=0;
-    for(int i=0;i<seating.size();++i){
-        if((i&1)==0 && gcount<gents.size())
-            seating[mcount++]->setText(gents[gcount++]);
-        else
-            seating[mcount++]->setText(lads[lcount++]);
+    int male_iterator=0,female_iterator=0;
+    for(int i=0;i<male_count+female_count;++i){
+        if(seating_rule[i]==MALE) seating[i]->setText(male[male_iterator++]);
+        else seating[i]->setText(female[female_iterator++]);
     }
 }
 
 void Dialog::init(){
-    this->setWindowTitle("QTempatDuduk v1.2");
+    this->setWindowTitle("QTempatDuduk v1.3");
     this->resize(1130,500);
 
-    btnRandomize=new QPushButton(tr("Shuffle! (&gender)"),this);
-    btnRandomizeCombine=new QPushButton(tr("Shuffle! (&normal)"),this);
+    btnRandomize=new QPushButton(tr("&Shuffle!"),this);
     btnExit=new QPushButton(tr("E&xit"),this);
 
     mainLayout=new QVBoxLayout(this);
     buttonLayout=new QHBoxLayout(this);
     seatLayout=new QGridLayout(this);
 
+    init_data();
     init_seat();
 
     buttonLayout->addStretch();
     buttonLayout->addWidget(btnRandomize);
-    buttonLayout->addWidget(btnRandomizeCombine);
     buttonLayout->addWidget(btnExit);
 
     connect(btnExit,SIGNAL(clicked()),this,SLOT(accept()));
     connect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
-    connect(btnRandomizeCombine,SIGNAL(clicked()),this,SLOT(shuffle_no_gender_animated()));
 
 
     mainLayout->addLayout(seatLayout);
     mainLayout->addLayout(buttonLayout);
     this->setLayout(mainLayout);
-
-    init_data();
-
-    srand(QTime::currentTime().msec());
 }
 
 void Dialog::init_seat(){
@@ -138,60 +87,50 @@ void Dialog::init_seat(){
     font.setBold(true);
     font.setFamily("Open Sans"); //change this if you don't have Open Sans
 
-    //TODO: add dynamic seating layout, possibly using textfile
-
-    for(int i=0;i<2*4;i+=2)
-        for(int j=0;j<3*4;j+=3){
-            for(int k=0;k<2;++k){
-                seat=new QLabel(this);
-                seat->setPalette(palette);
-                seat->setMinimumSize(18,90);
-                seat->setFont(font);
-                seat->setAutoFillBackground(true);
-                seat->setText("-");
-                seat->setAlignment(Qt::AlignCenter);
-                seatLayout->addWidget(seat,i,j+k);
+    for(int i=0;i<rule_row;++i){
+        for(int j=0;j<rule_column;++j){
+            if(rule[i][j]=='.') seatLayout->addItem(new QSpacerItem(15,10),i,j);
+            else{
+                init_seat_aux();
+                seatLayout->addWidget(seat,i,j);
                 seating.push_back(seat);
+                seating_rule.push_back((rule[i][j]=='m'? MALE : FEMALE));
             }
-            space=new QSpacerItem(10,0);
-            if(j<(3*4-1))seatLayout->addItem(space,i,j+1);
-            space=new QSpacerItem(0,10);
-            if(i<(2*4-1))seatLayout->addItem(space,i+1,j,1,3);
         }
-
-    for(int i=0;i<3;++i){
-        seat=new QLabel(this);
-        seat->setText("-");
-        seat->setPalette(palette);
-        seat->setMinimumSize(18,90);
-        seat->setFont(font);
-        seat->setAutoFillBackground(true);
-        seat->setAlignment(Qt::AlignCenter);
-        seating.push_back(seat);
-        seatLayout->addWidget(seat,2*4,4+i);
     }
 
+}
+
+void Dialog::init_seat_aux(){
+    seat=new QLabel("-",this);
+    seat->setPalette(palette);
+    seat->setFont(font);
+    seat->setAutoFillBackground(true);
+    seat->setAlignment(Qt::AlignCenter);
+    seat->setMinimumSize(15,80);
 }
 
 void Dialog::init_data(){
     //get data
     QString s;
-    QFile db_male(":/database/male.txt"),db_female(":/database/female.txt");
+    QFile db_male(":/database/male.txt"),db_female(":/database/female.txt"),db_rule(":/database/custom.seating.txt");
     if(!db_male.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", db_male.errorString());
+        QMessageBox::information(0, "Error", db_male.errorString());
     }
     if(!db_female.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", db_female.errorString());
+        QMessageBox::information(0, "Error", db_female.errorString());
+    }
+    if(!db_rule.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "Error", db_rule.errorString());
     }
 
-    QTextStream in_male(&db_male),in_female(&db_female);
-    int male_count, female_count;
+    QTextStream in_male(&db_male),in_female(&db_female),in_rule(&db_rule);
 
     in_male>>male_count;
     in_male.readLine();
     for(int i=0;i<male_count;++i){
         s = in_male.readLine();
-        if(s.size()>1)gents.push_back(s);
+        if(s.size()>1)male.push_back(s);
     }
     db_male.close();
 
@@ -199,7 +138,18 @@ void Dialog::init_data(){
     in_female.readLine();
     for(int i=0;i<female_count;++i) {
         s = in_female.readLine();
-        if(s.size()>1)lads.push_back(s);
+        if(s.size()>1)female.push_back(s);
     }
     db_female.close();
+
+    in_rule>>rule_male>>rule_female;
+    if(rule_male!=male_count || rule_female!=female_count)
+        QMessageBox::information(0, "Error", "Mismatch number of person");
+
+    in_rule>>rule_row>>rule_column;
+    for(int i=0;i<rule_row;++i){
+        in_rule>>s;
+        rule.push_back(s);
+    }
+
 }
