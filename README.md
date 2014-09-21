@@ -20,7 +20,7 @@ For seating layout, you have to change it manually in the code, as I'm still lea
 - C++ >= 4.3.2
 - Qt4
 
-## Installation
+## Compiling & Running
 ```sh
 $ git clone https://github.com/rkkautsar/QTempatDuduk
 $ cd QTempatDuduk
