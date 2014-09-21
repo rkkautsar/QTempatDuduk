@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#define MALE true
+#define FEMALE false
 const int animation_time=animation_time_ms/per_frame_ms;
 
 class Dialog : public QDialog
