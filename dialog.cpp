@@ -11,8 +11,6 @@ Dialog::~Dialog()
 
 }
 
-//TODO: add custom shuffle, possibly using textfile
-
 void Dialog::shuffle_animated(){
     //lock button
     btnRandomize->setDown(true);
@@ -71,10 +69,10 @@ void Dialog::init(){
 }
 
 void Dialog::init_seat(){
-    QBrush fontBrush(QColor(255, 255, 255, 255));
+    QBrush fontBrush(QColor(FONTCOLOR));
     fontBrush.setStyle(Qt::SolidPattern);
 
-    QBrush seatBrush(QColor(200, 100, 40, 255));
+    QBrush seatBrush(QColor(SEATCOLOR));
     seatBrush.setStyle(Qt::SolidPattern);
 
     palette.setBrush(QPalette::Active, QPalette::WindowText, fontBrush);
@@ -83,13 +81,13 @@ void Dialog::init_seat(){
     palette.setBrush(QPalette::Active, QPalette::Window, seatBrush);
     palette.setBrush(QPalette::Inactive, QPalette::Window, seatBrush);
 
-    font.setPointSize(16);
+    font.setPointSize(FONTSIZE);
     font.setBold(true);
-    font.setFamily("Open Sans"); //change this if you don't have Open Sans
+    font.setFamily(FONTFAMILY);
 
     for(int i=0;i<rule_row;++i){
         for(int j=0;j<rule_column;++j){
-            if(rule[i][j]=='.') seatLayout->addItem(new QSpacerItem(15,10),i,j);
+            if(rule[i][j]=='.') seatLayout->addItem(new QSpacerItem(SPACERSIZE),i,j);
             else{
                 init_seat_aux();
                 seatLayout->addWidget(seat,i,j);
@@ -107,7 +105,7 @@ void Dialog::init_seat_aux(){
     seat->setFont(font);
     seat->setAutoFillBackground(true);
     seat->setAlignment(Qt::AlignCenter);
-    seat->setMinimumSize(15,80);
+    seat->setMinimumSize(SEATMINIMUMSIZE);
 }
 
 void Dialog::init_data(){
@@ -115,13 +113,13 @@ void Dialog::init_data(){
     QString s;
     QFile db_male(":/database/male.txt"),db_female(":/database/female.txt"),db_rule(":/database/custom.seating.txt");
     if(!db_male.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "Error", db_male.errorString());
+        QMessageBox::information(0, tr("Error"), db_male.errorString());
     }
     if(!db_female.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "Error", db_female.errorString());
+        QMessageBox::information(0, tr("Error"), db_female.errorString());
     }
     if(!db_rule.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "Error", db_rule.errorString());
+        QMessageBox::information(0, tr("Error"), db_rule.errorString());
     }
 
     QTextStream in_male(&db_male),in_female(&db_female),in_rule(&db_rule);
@@ -130,7 +128,7 @@ void Dialog::init_data(){
     in_male.readLine();
     for(int i=0;i<male_count;++i){
         s = in_male.readLine();
-        if(s.size()>1)male.push_back(s);
+        if(s.size())male.push_back(s);
     }
     db_male.close();
 
@@ -138,13 +136,13 @@ void Dialog::init_data(){
     in_female.readLine();
     for(int i=0;i<female_count;++i) {
         s = in_female.readLine();
-        if(s.size()>1)female.push_back(s);
+        if(s.size())female.push_back(s);
     }
     db_female.close();
 
     in_rule>>rule_male>>rule_female;
     if(rule_male!=male_count || rule_female!=female_count)
-        QMessageBox::information(0, "Error", "Mismatch number of person");
+        QMessageBox::information(0, tr("Error"), tr("Mismatch number of person"));
 
     in_rule>>rule_row>>rule_column;
     for(int i=0;i<rule_row;++i){

@@ -8,6 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 
 # Input
-HEADERS += dialog.h
+HEADERS += dialog.h \
+    config.h
 SOURCES += dialog.cpp main.cpp
 RESOURCES += Resources.qrc

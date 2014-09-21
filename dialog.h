@@ -1,6 +1,8 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#include "config.h"
+
 #include <QDialog>
 #include <QtGui>
 #include <QApplication>
@@ -8,11 +10,6 @@
 
 #include <cstdlib>
 #include <algorithm>
-
-#define animation_time_ms 500 //500 ms
-#define per_frame_ms 50 //1 frame per 50 ms
-#define MALE true
-#define FEMALE false
 
 const int animation_time=animation_time_ms/per_frame_ms;
 
@@ -32,7 +29,7 @@ private:
     QVBoxLayout* mainLayout;
     QHBoxLayout* buttonLayout;
     QGridLayout* seatLayout;
-    QList<bool> seating_rule; //true for male, false for female
+    QList<bool> seating_rule;
     QList<QLabel*> seating;
     QList<QString> male,female,rule;
     QPushButton *btnRandomize, *btnExit;
