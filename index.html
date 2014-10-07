@@ -34,7 +34,7 @@
         <h1>
 <a name="qtempatduduk" class="anchor" href="#qtempatduduk"><span class="octicon octicon-link"></span></a>QTempatDuduk</h1>
 
-<p><img src="https://dl.dropboxusercontent.com/u/67525874/Screenshot/Screenshot%20from%20QTempatDudukv1.3.png" alt="Screenshot"></p>
+<p><a href="https://cloud.githubusercontent.com/assets/1536976/4542320/810cd390-4e20-11e4-80f6-a89c8135dcc9.png">!v1.4</a></p>
 
 <p>A Qt4 app to randomize seating. Created for learning purposes.</p>
 
@@ -45,17 +45,20 @@
 <li>Configurable color, size, font, and animation</li>
 <li>Custom seating layout</li>
 <li>Custom seating rule</li>
+<li>Open database from file, in-program</li>
 </ul><h2>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <ul>
 <li>C++ &gt;= 4.3.2</li>
 <li>Qt4</li>
-</ul><h2>
+</ul><p>Tested on Linux 3.11-2-686-pae #1 SMP Debian 3.11.8-1 (2013-11-13) i686 GNU/Linux (LMDE)</p>
+
+<h2>
 <a name="compiling--running" class="anchor" href="#compiling--running"><span class="octicon octicon-link"></span></a>Compiling &amp; Running</h2>
 
-<div class="highlight highlight-sh"><pre><span class="nv">$ </span>git clone https://github.com/rkkautsar/QTempatDuduk
-<span class="nv">$ </span><span class="nb">cd </span>QTempatDuduk
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>git clone https://github.com/rkkautsar/QTempatDuduk   <span class="c"># ignore this if you download the zip/tar</span>
+<span class="nv">$ </span><span class="nb">cd </span>QTempatDuduk                   <span class="c"># go to the project directory</span>
 <span class="nv">$ </span>qmake
 <span class="nv">$ </span>make
 <span class="nv">$ </span>./QTempatDuduk
@@ -67,24 +70,28 @@
 <a name="configuration-files" class="anchor" href="#configuration-files"><span class="octicon octicon-link"></span></a>Configuration Files</h2>
 
 <h3>
-<a name="maletxt-and-femaletxt" class="anchor" href="#maletxt-and-femaletxt"><span class="octicon octicon-link"></span></a>
-<code>male.txt</code> and <code>female.txt</code>
-</h3>
+<a name="peopletxt" class="anchor" href="#peopletxt"><span class="octicon octicon-link"></span></a>people.txt</h3>
 
 <p>They are the names for the seating layout. Here's the template:</p>
 
-<pre><code>[number of name]
+<pre><code>[number of male]
 Alpha
 Beta
 Gamma
 .
 .
+
+[number of female]
+Alpha
+Beta
+Gamma
 .
+.
+
 </code></pre>
 
 <h3>
-<a name="customseatingtxt" class="anchor" href="#customseatingtxt"><span class="octicon octicon-link"></span></a><code>custom.seating.txt</code>
-</h3>
+<a name="seatingtxt" class="anchor" href="#seatingtxt"><span class="octicon octicon-link"></span></a>seating.txt</h3>
 
 <p>This is the custom rule and layout configuration, it is really not complicated to edit it or make a new layout and rule entirely. This is the template:</p>
 
@@ -109,6 +116,14 @@ ff.mm.ff.mm
 </code></pre>
 
 <p>The layout and rule section is a mapping or matrix <code>[number of row] x [number of column]</code> of characters. The accepted characters are <code>{'.','m','f'}</code>. <code>'.'</code> represents a space, <code>'m'</code> represents a seat that should be seated by a male, and <code>'f'</code> represents a seat that should be seated by a female. You should at dots between rows too so there is a space between seating rows.</p>
+
+<h2>
+<a name="precompiled-binaries" class="anchor" href="#precompiled-binaries"><span class="octicon octicon-link"></span></a>Precompiled Binaries</h2>
+
+<ul>
+<li>
+<a href="https://github.com/rkkautsar/QTempatDuduk/releases/download/v1.4/QTempatDuduk-v1.4.win32.zip">Windows 32-bit</a>, tested on Wine-1.4.1</li>
+</ul>
       </section>
     </div>
 
