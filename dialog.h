@@ -26,6 +26,9 @@ public:
 protected slots:
     void shuffle();
     void shuffle_animated();
+    void change_people();
+    void change_rule();
+    void update();
 
 private:
     QVBoxLayout* mainLayout;
@@ -34,7 +37,8 @@ private:
     QList<bool> seating_rule;
     QList<QLabel*> seating;
     QList<QString> male,female,rule;
-    QPushButton *btnRandomize, *btnExit;
+    QPushButton *btnChangePeople, *btnChangeRule, *btnUpdate, *btnRandomize, *btnExit;
+    QString db_people_filename, db_rule_filename;
     QLabel* seat;
     QPalette palette;
     QFont font;

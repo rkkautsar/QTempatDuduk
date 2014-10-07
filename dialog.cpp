@@ -42,9 +42,12 @@ void Dialog::shuffle(){
 }
 
 void Dialog::init(){
-    this->setWindowTitle("QTempatDuduk v1.3");
-    this->resize(1130,500);
+    this->setWindowTitle("QTempatDuduk v1.4");
+    this->resize(1000,500);
 
+    btnChangePeople=new QPushButton(tr("&People..."),this);
+    btnChangeRule=new QPushButton(tr("&Rule..."),this);
+    btnUpdate=new QPushButton(tr("&Update!"),this);
     btnRandomize=new QPushButton(tr("&Shuffle!"),this);
     btnExit=new QPushButton(tr("E&xit"),this);
 
@@ -52,13 +55,23 @@ void Dialog::init(){
     buttonLayout=new QHBoxLayout(this);
     seatLayout=new QGridLayout(this);
 
+    //default files
+    db_people_filename="./people.txt";
+    db_rule_filename="./seating.txt";
+
     init_data();
     init_seat();
 
+    buttonLayout->addWidget(btnChangePeople);
+    buttonLayout->addWidget(btnChangeRule);
+    buttonLayout->addWidget(btnUpdate);
     buttonLayout->addStretch();
     buttonLayout->addWidget(btnRandomize);
     buttonLayout->addWidget(btnExit);
 
+    connect(btnChangePeople,SIGNAL(clicked()),this,SLOT(change_people()));
+    connect(btnChangeRule,SIGNAL(clicked()),this,SLOT(change_rule()));
+    connect(btnUpdate,SIGNAL(clicked()),this,SLOT(update()));
     connect(btnExit,SIGNAL(clicked()),this,SLOT(accept()));
     connect(btnRandomize,SIGNAL(clicked()),this,SLOT(shuffle_animated()));
 
@@ -111,34 +124,30 @@ void Dialog::init_seat_aux(){
 void Dialog::init_data(){
     //get data
     QString s;
-    QFile db_male(":/database/male.txt"),db_female(":/database/female.txt"),db_rule(":/database/custom.seating.txt");
-    if(!db_male.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, tr("Error"), db_male.errorString());
-    }
-    if(!db_female.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, tr("Error"), db_female.errorString());
+    QFile db_people(db_people_filename),db_rule(db_rule_filename);
+    if(!db_people.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, tr("Error"), db_people.errorString());
     }
     if(!db_rule.open(QIODevice::ReadOnly)) {
         QMessageBox::information(0, tr("Error"), db_rule.errorString());
     }
 
-    QTextStream in_male(&db_male),in_female(&db_female),in_rule(&db_rule);
+    QTextStream in_people(&db_people),in_rule(&db_rule);
 
-    in_male>>male_count;
-    in_male.readLine();
+    in_people>>male_count;
+    in_people.readLine(); //clearing
     for(int i=0;i<male_count;++i){
-        s = in_male.readLine();
+        s = in_people.readLine();
         if(s.size())male.push_back(s);
     }
-    db_male.close();
 
-    in_female>>female_count;
-    in_female.readLine();
+    in_people>>female_count;
+    in_people.readLine();
     for(int i=0;i<female_count;++i) {
-        s = in_female.readLine();
+        s = in_people.readLine();
         if(s.size())female.push_back(s);
     }
-    db_female.close();
+    db_people.close();
 
     in_rule>>rule_male>>rule_female;
     if(rule_male!=male_count || rule_female!=female_count)
@@ -149,5 +158,42 @@ void Dialog::init_data(){
         in_rule>>s;
         rule.push_back(s);
     }
+    db_rule.close();
+
+}
+
+void Dialog::change_people(){
+    db_people_filename=
+            QFileDialog::getOpenFileName(this,
+                                         tr("Select file..."),
+                                         QDir::homePath(),
+                                         tr("Text files (*.txt)"));
+}
+
+void Dialog::change_rule(){
+    db_rule_filename=
+            QFileDialog::getOpenFileName(this,
+                                         tr("Select file..."),
+                                         QDir::homePath(),
+                                         tr("Text files (*.txt)"));
+
+}
+
+void Dialog::update(){
+    //empty all
+    male.clear();
+    female.clear();
+    seating_rule.clear();
+    for(int i=0;i<rule_row;++i)
+        for(int j=0;j<rule_column;++j)
+            seatLayout->removeItem(seatLayout->itemAtPosition(i,j));
+    for(int i=0;i<seating.size();++i)
+        delete seating[i];
+    seating.clear();
+    rule.clear();
+
+    //redo
+    init_data();
+    init_seat();
 
 }
