@@ -168,6 +168,10 @@ void Dialog::change_people(){
                                          tr("Select file..."),
                                          QDir::homePath(),
                                          tr("Text files (*.txt)"));
+    if(!QFile(db_people_filename).exists()){
+        QMessageBox::information(0, tr("Error"), "File not found");
+        db_people_filename="./people.txt";
+    }
 }
 
 void Dialog::change_rule(){
@@ -176,7 +180,10 @@ void Dialog::change_rule(){
                                          tr("Select file..."),
                                          QDir::homePath(),
                                          tr("Text files (*.txt)"));
-
+    if(!QFile(db_rule_filename).exists()){
+        QMessageBox::information(0, tr("Error"), "File not found");
+        db_rule_filename="./seating.txt";
+    }
 }
 
 void Dialog::update(){
